@@ -1,0 +1,6 @@
+{
+    "verbose": false,
+    "ignore": ["node_modules", "/dist", "/build"],
+    "ext": "ts graphql",
+    "exec": "ts-node src/index.ts"
+}
