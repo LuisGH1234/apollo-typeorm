@@ -5,6 +5,8 @@ import { ResolverFn } from "apollo-server-express";
 
 declare global {
     interface RootResolver {
+        Query: Resolver;
+        Mutation: Resolver;
         [key: string]: Resolver;
     }
 
@@ -12,8 +14,8 @@ declare global {
         [key: string]: ResolverFn;
     }
 
-    interface MR<T = any> {
-        (props: T): Resolver;
+    interface FR<T = any> {
+        (props: T): void;
     }
 
     interface Context {

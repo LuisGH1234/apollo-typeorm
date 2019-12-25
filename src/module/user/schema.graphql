@@ -1,15 +1,11 @@
-type Query {
+extend type Query {
     user(id: ID!): User!
-    users(page: Int, limit: Int, filter: String): UserPaginationResult!
+    users(page: Int, limit: Int, filter: String): UserPaginationResult! @Auth
     login(email: String!, password: String!): AuthResult!
 }
 
-type Mutation {
-    register(user: UserInput!): AuthResult! @hasScope(scopes: ["user:write"])
-}
-
 extend type Mutation {
-    register2(user: UserInput!): AuthResult!
+    register(user: UserInput!): AuthResult!
 }
 
 type AuthResult {

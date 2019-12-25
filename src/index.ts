@@ -1,14 +1,14 @@
 import "reflect-metadata";
 import { createConnection } from "typeorm";
 import { ApolloServer } from "apollo-server-express";
-import { makeSchema } from "./module";
+import { useSchema } from "./module";
 import * as express from "express";
 
 async function init() {
     try {
         await createConnection();
-        const schema = makeSchema();
-        const server = new ApolloServer({ schema });
+        const schema = useSchema();
+        const server = new ApolloServer({ schema, context: req => req });
         const app = express();
         server.applyMiddleware({ app });
         app.set("PORT", process.env.PORT || 3001);

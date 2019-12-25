@@ -1,47 +1,54 @@
-import { makeExecutableSchema } from "graphql-tools";
+import { makeExecutableSchema, SchemaDirectiveVisitor } from "graphql-tools";
 import { gql } from "apollo-server-express";
+import { queries, mutations } from "../lib/helper/schema";
 import { userResolver } from "./user/user.resolver";
-import { typeDefs } from "../lib/helper/schema";
+import { defaultFieldResolver } from "graphql";
+import { verify } from "../lib/helper/jwt";
+import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
+import { useTypeDef } from "../lib/hook";
 
-const books = [
-    {
-        title: "Harry Potter and the Chamber of Secrets",
-        author: "J.K. Rowling"
-    },
-    {
-        title: "Jurassic Park",
-        author: "Michael Crichton"
+class UpperCaseDirective extends SchemaDirectiveVisitor {
+    visitFieldDefinition(field) {
+        const { resolve = defaultFieldResolver } = field;
+        field.resolve = (...args: any[]) => {
+            console.log("in auth directive");
+            const context = args[2] as ExpressContext;
+            // console.log(context.req);
+            verify(context.req, context.res);
+            return resolve.apply(this, args);
+        };
+        //   field.resolve = async function (...args) {
+        //     const result = await resolve.apply(this, args);
+        //     if (typeof result === "string") {
+        //       return result.toUpperCase();
+        //     }
+        //     return result;
+        //   };
     }
-];
+}
 
-const typeDefs2 = gql`
-    type Author {
-        books: [Book]
-    }
-    type Book {
-        title: String
-        author: String
-    }
-
+const rootTypeDef = gql`
+    directive @Auth on FIELD_DEFINITION
     type Query {
-        books: [Book]
+        _: Boolean
     }
-
     type Mutation {
-        register(user: UserInput!): AuthResult!
+        _: Boolean
     }
 `;
-typeDefs.push(typeDefs2);
-export function makeSchema() {
+
+export function useSchema() {
+    const typeDefs = useTypeDef(rootTypeDef);
+    userResolver({});
     const resolvers: RootResolver = {
-        // UserModule: ,
-        Query: {
-            books: () => books,
-            ...userResolver({})
-        },
-        Author: {
-            books: () => books
-        }
+        Query: queries,
+        Mutation: mutations
     };
-    return makeExecutableSchema({ typeDefs, resolvers });
+    return makeExecutableSchema({
+        typeDefs,
+        resolvers,
+        schemaDirectives: {
+            Auth: UpperCaseDirective
+        }
+    });
 }
