@@ -8,7 +8,7 @@
         "typescript": "3.3.3333"
     },
     "dependencies": {
-        "apollo-server-express": "^2.9.14",
+        "apollo-server-express": "^2.14.2",
         "bcrypt": "3.0.6",
         "graphql": "^14.5.8",
         "graphql-tools": "^4.0.6",
